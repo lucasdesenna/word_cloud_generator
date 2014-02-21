@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+        <script type="text/javascript" src="jquery-1.10.2.min.js"></script>
+        <script type="text/javascript">
+            var wordList = ["Adult", "Aeroplane", "Air", "Aircraft Carrier", "Airforce", "Airport", "Album", "Alphabet", "Apple", "Arm", "Army", "Baby", "Baby", "Backpack", "Balloon", "Banana", "Bank", "Barbecue", "Bathroom", "Bathtub", "Bed", "Bed", "Bee", "Bible", "Bird", "Bomb", "Book", "Boss", "Bottle", "Bowl", "Box", "Boy", "Brain", "Bridge", "Butterfly", "Button", "Cappuccino", "Car", "Car-race", "Carpet", "Carrot", "Cave", "Chair", "Chess Board", "Chief", "Child", "Chisel", "Chocolates", "Church", "Church", "Circle", "Circus", "Circus", "Clock", "Clown", "Coffee", "Coffee-shop", "Comet", "Compact Disc", "Compass", "Computer", "Crystal", "Cup", "Cycle", "Data Base", "Desk", "Diamond", "Dress", "Drill", "Drink", "Drum", "Dung", "Ears", "Earth", "Egg", "Electricity", "Elephant", "Eraser", "Explosive", "Eyes", "Family", "Fan", "Feather", "Festival", "Film", "Finger", "Fire", "Floodlight", "Flower", "Foot", "Fork", "Freeway", "Fruit", "Fungus", "Game", "Garden", "Gas", "Gate", "Gemstone", "Girl", "Gloves", "God", "Grapes", "Guitar", "Hammer", "Hat", "Hieroglyph", "Highway", "Horoscope", "Horse", "Hose", "Ice", "Ice-cream", "Insect", "Jet fighter", "Junk", "Kaleidoscope", "Kitchen", "Knife", "Leather jacket", "Leg", "Library", "Liquid", "Magnet", "Man", "Map", "Maze", "Meat", "Meteor"];
+
+            function createMatrix(rows, columns) {
+                var matrix = [];
+                for(var r = 0; r < rows; r++) {
+                    matrix.push([]);
+                    for(var c = 0; c < columns; c++) {
+                        var cell = {
+                            id: ("r" + r + "-c" + c),
+                            free: true
+                        };
+
+                        matrix[r].push(cell);
+                    }
+                }
+
+                return matrix
+            }
+
+            function renderMatrix(matrix) {
+                for(var r = 0; r < matrix.length; r++) {
+                    for(var c = 0; c < matrix[r].length; c++) {
+                        var cell = $("<div></div>");
+                        $(cell)
+                        .attr("id", matrix[r][c].id)
+                        .css({
+                            display: cellOpts.display,
+                            width: cellWidth,
+                            height: cellHeight,
+                            padding: cellOpts.padding,
+                            border: "#000 solid thin"
+                        });
+                        if(c == matrix[r].length - 1) {
+                            $(cell).css({
+                                clear: "right"
+                            });
+                        }
+                        $("body").append(cell);
+                    }
+                }
+            }
+
+            function populateMatrix(matrix, wordList, cellWidth, cellHeight) {
+                for(var w = 0; w < wordList.length; w++) {
+                    var word = $("<div></div>");
+                    var fontSize = 8 + Math.round(Math.random() * 48);
+                    $(word)
+                    .css("fontSize", fontSize + "px")
+                    .html(wordList[w]);
+                    $("body").append(word);
+
+                    var width = Math.ceil($(word).width() / cellWidth) + 2;
+                    var height = Math.ceil($(word).height() / cellHeight) + 2;
+                    var slot = findSlot(matrix, width, height);
+                    positionWord(word, slot, cellWidth, cellHeight);
+                    occupySlot(matrix, slot, width, height);
+                }
+            }
+
+            function findSlot(matrix, width, height) {
+                for(var r = 0; r < matrix.length; r++) {
+                    for(var c = 0; c < matrix[r].length; c++) {
+                        if(matrix[r][c].free === true) {
+                            if(checkArea(matrix, r, r + height - 1, c, c + width - 1) === true) {
+                                var slot = {r: r, c: c};
+                                return slot;
+                            }
+                        }
+                    }
+                }
+            }
+
+            function checkArea(matrix, startRow, endRow, startColumn, endColumn) {
+                var width = endColumn - startColumn;
+                var height = endRow - startRow;
+                for(var r = startRow; r < endRow; r++) {
+                    if(matrix[r] !== undefined) {
+                        for(var c = startColumn; c < endColumn; c++) {
+                            if(matrix[r][c] == undefined || matrix[r][c].free !== true) {
+                                return false;
+                            }
+                        }
+                    }
+                }
+                return true;
+            }
+
+            function positionWord(word, slot, cellWidth, cellHeight) {
+                $(word).css({
+                    left: slot.c * cellWidth + "px",
+                    top: slot.r * cellHeight + "px"
+                });
+            }
+
+            function occupySlot(matrix, slot, width, height) {
+                for(var r = slot.r; r < slot.r + height - 2; r++) {
+                    for(var c = slot.c; c < slot.c + width - 2; c++) {
+                        matrix[r][c].free = false;
+                    }
+                }
+            }
+        </script>
+        <style>
+            div {
+                position: absolute;
+                padding: 8px;
+                text-align: center;
+                vertical-align: middle;
+                box-sizing: border-box;
+            }
+        </style>
+    </head>
+    <body>
+        <script type="text/javascript">
+            $(document).ready(function(){
+                matrix = createMatrix(200,200);
+                //renderMatrix(matrix);
+                populateMatrix(matrix, wordList, 8, 8);
+            })
+        </script>
+    </body>
+</html>
